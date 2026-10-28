@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Løs eksponentiallikninger, ett steg om gangen, i Eksponentialløpet."
+    />
+    <title>Eksponentialløpet — matte på vei mot mål</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17251f;
+        --muted: #64736b;
+        --paper: #f7f7f0;
+        --card: #fffefa;
+        --green: #245c43;
+        --green-dark: #194430;
+        --lime: #d7f36a;
+        --line: #e4e8dc;
+        --orange: #e98a4a;
+        --red: #a63d34;
+        --shadow: 0 18px 55px rgb(23 37 31 / 9%);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        background:
+          radial-gradient(ellipse at 86% 9%, rgb(215 243 106 / 22%), transparent 25rem),
+          var(--paper);
+        color: var(--ink);
+        font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #87a935;
+        outline-offset: 3px;
+      }
+
+      .page-shell {
+        width: min(1120px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 82px;
+        border-bottom: 1px solid rgb(23 37 31 / 10%);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        color: var(--ink);
+        font-size: 15px;
+        font-weight: 850;
+        letter-spacing: 0.045em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 35px;
+        height: 35px;
+        place-items: center;
+        border-radius: 12px;
+        background: var(--green);
+        color: var(--lime);
+        font-size: 18px;
+        line-height: 1;
+        transform: rotate(-8deg);
+      }
+
+      .top-note {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .intro {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 46px 0 30px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 650px;
+        margin: 0;
+        font-size: clamp(36px, 6vw, 61px);
+        font-weight: 850;
+        letter-spacing: -0.065em;
+        line-height: 0.99;
+      }
+
+      .intro-copy {
+        max-width: 295px;
+        margin: 0 0 3px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.65;
+      }
+
+      .race-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 292px;
+        gap: 22px;
+        align-items: start;
+        padding-bottom: 42px;
+      }
+
+      .lesson-card,
+      .progress-card {
+        border: 1px solid rgb(23 37 31 / 7%);
+        border-radius: 23px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+      }
+
+      .lesson-card {
+        min-height: 476px;
+        padding: clamp(24px, 5vw, 46px);
+      }
+
+      .task-topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 26px;
+      }
+
+      .task-label {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 750;
+      }
+
+      .difficulty {
+        padding: 7px 11px;
+        border-radius: 99px;
+        background: #eef4df;
+        color: var(--green-dark);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 0 0 10px;
+        font-size: clamp(24px, 4vw, 33px);
+        letter-spacing: -0.045em;
+      }
+
+      .equation {
+        display: flex;
+        min-height: 132px;
+        align-items: center;
+        justify-content: center;
+        margin: 27px 0 24px;
+        padding: 22px;
+        border: 1px dashed #dfe6d4;
+        border-radius: 17px;
+        background: #f8faef;
+        color: var(--green-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(27px, 5vw, 42px);
+        font-weight: 650;
+        letter-spacing: -0.04em;
+        text-align: center;
+      }
+
+      .equation sup {
+        position: relative;
+        top: -0.35em;
+        font-size: 0.58em;
+      }
+
+      .answer-label {
+        display: block;
+        margin-bottom: 9px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .answer-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .answer-input {
+        width: 100%;
+        min-width: 0;
+        height: 52px;
+        padding: 0 15px;
+        border: 1px solid #dfe4d8;
+        border-radius: 12px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 16px;
+      }
+
+      .answer-input::placeholder {
+        color: #97a198;
+      }
+
+      .primary-button,
+      .secondary-button {
+        display: inline-flex;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 800;
+        transition: background 150ms ease, transform 150ms ease;
+      }
+
+      .primary-button {
+        flex: 0 0 auto;
+        background: var(--green);
+        color: #fff;
+      }
+
+      .primary-button:hover:not(:disabled) {
+        background: var(--green-dark);
+        transform: translateY(-1px);
+      }
+
+      .primary-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .secondary-button {
+        background: #eef2e8;
+        color: var(--green-dark);
+      }
+
+      .secondary-button:hover {
+        background: #e4ebd8;
+      }
+
+      .input-help {
+        margin: 9px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .hint-button {
+        margin-top: 20px;
+        padding: 4px 0;
+        border: 0;
+        background: transparent;
+        color: var(--green);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: underline;
+        text-decoration-color: #b6c693;
+        text-underline-offset: 4px;
+      }
+
+      .hint-panel,
+      .feedback {
+        margin-top: 16px;
+        padding: 15px 17px;
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .hint-panel {
+        border: 1px solid #e8ebdd;
+        background: #fafbf5;
+        color: #435147;
+      }
+
+      .hint-panel[hidden],
+      .feedback[hidden] {
+        display: none;
+      }
+
+      .feedback {
+        border: 1px solid transparent;
+      }
+
+      .feedback.error {
+        border-color: #f0d7d1;
+        background: #fff5f2;
+        color: #8d3029;
+      }
+
+      .feedback.success {
+        border-color: #dce9c7;
+        background: #f3f8e9;
+        color: #2e5230;
+      }
+
+      .feedback strong {
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .feedback .primary-button,
+      .feedback .secondary-button {
+        min-height: 42px;
+        margin-top: 13px;
+      }
+
+      .progress-card {
+        position: sticky;
+        top: 20px;
+        padding: 24px 21px 20px;
+      }
+
+      .progress-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 7px;
+      }
+
+      .progress-heading h2 {
+        margin: 0;
+        font-size: 17px;
+        letter-spacing: -0.025em;
+      }
+
+      .progress-count {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .progress-track {
+        height: 7px;
+        overflow: hidden;
+        margin: 13px 0 19px;
+        border-radius: 99px;
+        background: #edf0e9;
+      }
+
+      .progress-fill {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: #91b735;
+        transition: width 250ms ease;
+      }
+
+      .stage-list {
+        display: grid;
+        gap: 7px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .stage-button {
+        display: grid;
+        width: 100%;
+        grid-template-columns: 35px minmax(0, 1fr) 18px;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 8px;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--ink);
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .stage-button:hover:not(:disabled),
+      .stage-button[aria-current="step"] {
+        background: #f1f5e8;
+      }
+
+      .stage-button:disabled {
+        color: #9ba49b;
+        cursor: not-allowed;
+      }
+
+      .stage-number {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border: 1px solid #e0e5da;
+        border-radius: 11px;
+        background: #fff;
+        color: #667368;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .stage-button[aria-current="step"] .stage-number {
+        border-color: var(--green);
+        background: var(--green);
+        color: white;
+      }
+
+      .stage-button.is-solved .stage-number {
+        border-color: #eaf3ce;
+        background: #eaf3ce;
+        color: var(--green-dark);
+      }
+
+      .stage-copy {
+        min-width: 0;
+      }
+
+      .stage-name,
+      .stage-detail {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .stage-name {
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .stage-detail {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .stage-icon {
+        color: #a1ab9f;
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .stage-button.is-solved .stage-icon {
+        color: var(--green);
+      }
+
+      .finish-note {
+        margin: 20px 2px 0;
+        padding-top: 17px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 0 24px;
+        color: #778279;
+        font-size: 11px;
+      }
+
+      @media (max-width: 790px) {
+        .race-layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .progress-card {
+          position: static;
+          grid-row: 1;
+        }
+
+        .stage-list {
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          gap: 5px;
+        }
+
+        .stage-button {
+          grid-template-columns: 1fr;
+          justify-items: center;
+          gap: 5px;
+          padding: 8px 4px;
+          text-align: center;
+        }
+
+        .stage-detail,
+        .stage-icon {
+          display: none;
+        }
+
+        .stage-name {
+          font-size: 10px;
+        }
+
+        .finish-note {
+          margin-top: 13px;
+          padding-top: 12px;
+        }
+
+        .lesson-card {
+          grid-row: 2;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .page-shell {
+          width: min(100% - 30px, 520px);
+        }
+
+        .topbar {
+          min-height: 67px;
+        }
+
+        .brand {
+          font-size: 12px;
+        }
+
+        .brand-mark {
+          width: 31px;
+          height: 31px;
+          font-size: 16px;
+        }
+
+        .top-note {
+          font-size: 11px;
+        }
+
+        .intro {
+          display: block;
+          padding: 33px 0 24px;
+        }
+
+        .intro-copy {
+          max-width: 410px;
+          margin-top: 15px;
+          font-size: 14px;
+        }
+
+        .lesson-card {
+          min-height: 0;
+          padding: 23px 19px 24px;
+        }
+
+        .equation {
+          min-height: 112px;
+          margin: 22px 0;
+          padding: 14px;
+        }
+
+        .answer-row {
+          flex-direction: column;
+        }
+
+        .primary-button {
+          width: 100%;
+        }
+
+        .progress-card {
+          padding: 18px 13px 14px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#page-title" aria-label="Eksponentialløpet, gå til toppen">
+          <span class="brand-mark" aria-hidden="true">↗</span>
+          <span>Eksponentialløpet</span>
+        </a>
+        <span class="top-note">7 etapper · ett mål</span>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">Klar, ferdig, tenk!</p>
+            <h1 id="page-title">Løs én.<br />Lås opp neste.</h1>
+          </div>
+          <p class="intro-copy">
+          Sju eksponentiallikninger. Fullfør én etappe for å åpne den neste.
+          </p>
+        </section>
+
+        <div class="race-layout">
+          <section class="lesson-card" aria-labelledby="task-title">
+            <div class="task-topline">
+              <span class="task-label" id="task-label">Etappe 1 av 7</span>
+              <span class="difficulty" id="difficulty">Rolig start</span>
+            </div>
+
+            <h2 id="task-title">Oppgave 1</h2>
+
+            <div
+              class="equation"
+              id="equation"
+              role="img"
+              aria-label="10 opphøyd i x er lik 1000"
+            >
+              10<sup>x</sup> = 1000
+            </div>
+
+            <form id="answer-form" novalidate>
+              <label class="answer-label" for="answer">Hva er x?</label>
+              <div class="answer-row">
+                <input
+                  class="answer-input"
+                  id="answer"
+                  name="answer"
+                  type="text"
+                  inputmode="text"
+                  autocomplete="off"
+                  placeholder="Skriv x-verdien"
+                  aria-describedby="input-help feedback"
+                />
+                <button class="primary-button" type="submit">Sjekk svaret <span aria-hidden="true">→</span></button>
+              </div>
+              <p class="input-help" id="input-help">Svar kan være et tall, en brøk eller et uttrykk med ln() eller lg().</p>
+            </form>
+
+            <button
+              class="hint-button"
+              id="hint-button"
+              type="button"
+              aria-expanded="false"
+              aria-controls="hint-panel"
+            >
+              Trenger du et hint?
+            </button>
+            <div class="hint-panel" id="hint-panel" hidden></div>
+            <div class="feedback" id="feedback" role="status" aria-live="polite" hidden></div>
+          </section>
+
+          <aside class="progress-card" aria-labelledby="progress-title">
+            <div class="progress-heading">
+              <h2 id="progress-title">Løypa di</h2>
+              <span class="progress-count" id="progress-count">0 av 7 løst</span>
+            </div>
+            <div
+              class="progress-track"
+              id="progress-track"
+              role="progressbar"
+              aria-label="Framgang i Eksponentialløpet"
+              aria-valuemin="0"
+              aria-valuemax="7"
+              aria-valuenow="0"
+            >
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <ol class="stage-list" id="stage-list" aria-label="Etapper"></ol>
+            <p class="finish-note" id="finish-note">
+              Klarer du etappen? Da åpner neste seg. Du kan når som helst gå
+              tilbake til etapper du har løst.
+            </p>
+          </aside>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <span>Ta deg tid — gode løsninger starter med gode tanker.</span>
+        <span>Eksponentialløpet</span>
+      </footer>
+    </div>
+
+    <script>
+      const tasks = [
+        {
+          title: "Oppgave 1",
+          difficulty: "Nivå 1",
+          equation: "10<sup>x</sup> = 1000",
+          equationLabel: "10 opphøyd i x er lik 1000",
+          hint: "Skriv 1000 som en potens med grunntall 10. Hvilken eksponent får du da?",
+          answer: 3,
+          explanation: "1000 = 10³, så 10ˣ = 10³. Dermed er x = 3.",
+          name: "Oppgave 1",
+        },
+        {
+          title: "Oppgave 2",
+          difficulty: "Nivå 2",
+          equation: "10<sup>2x − 1</sup> = 100",
+          equationLabel: "10 opphøyd i 2 x minus 1 er lik 100",
+          hint: "Skriv 100 som 10². Når grunntallene er like, må eksponentene være like.",
+          answer: 1.5,
+          explanation: "100 = 10², så 2x − 1 = 2. Da er 2x = 3 og x = 1,5.",
+          name: "Oppgave 2",
+        },
+        {
+          title: "Oppgave 3",
+          difficulty: "Nivå 3",
+          equation: "3<sup>x</sup> = 2",
+          equationLabel: "3 opphøyd i x er lik 2",
+          hint: "Bruk logaritmer på begge sider av likningen.",
+          answer: Math.log(2) / Math.log(3),
+          explanation: "Ta logaritmen på begge sider: x · ln(3) = ln(2). Dermed er x = ln(2)/ln(3), som også er lg(2)/lg(3).",
+          name: "Oppgave 3",
+        },
+        {
+          title: "Oppgave 4",
+          difficulty: "Nivå 4",
+          equation: "3<sup>2x</sup> − 2 · 3<sup>x</sup> − 3 = 0",
+          equationLabel: "3 opphøyd i 2 x minus 2 ganger 3 opphøyd i x minus 3 er lik null",
+          hint: "Sett u = 3ˣ. Da får du en andregradslikning. Husk at 3ˣ alltid er positivt.",
+          answer: 1,
+          explanation: "Sett u = 3ˣ. Da får du u² − 2u − 3 = 0, altså (u − 3)(u + 1) = 0. Kandidatene er u = 3 og u = −1. Siden 3ˣ > 0 for alle x, er u = −1 ugyldig. u = 3 gir x = 1.",
+          name: "Oppgave 4",
+        },
+        {
+          title: "Oppgave 5",
+          difficulty: "Nivå 5",
+          equation: "2<sup>2x</sup> − 2 · 2<sup>x</sup> − 8 = 0",
+          equationLabel: "2 opphøyd i 2 x minus 2 ganger 2 opphøyd i x minus 8 er lik null",
+          hint: "Sett u = 2ˣ. Skriv 2²ˣ som u², og faktoriser andregradslikningen. Hvilke u-verdier er mulige?",
+          answer: 2,
+          explanation: "Sett u = 2ˣ. Da får du u² − 2u − 8 = 0, altså (u − 4)(u + 2) = 0. u = 4 eller u = −2. Fordi 2ˣ alltid er positivt, er u = −2 ugyldig. u = 4 gir 2ˣ = 4 = 2², altså x = 2. Du er i mål!",
+          name: "Oppgave 5",
+        },
+        {
+          title: "Oppgave 6",
+          difficulty: "Nivå 6",
+          equation: "5<sup>x − 1</sup> = 7",
+          equationLabel: "5 opphøyd i x minus 1 er lik 7",
+          hint: "Ta logaritmen på begge sider, og løs deretter likningen for x.",
+          answer: 1 + Math.log(7) / Math.log(5),
+          explanation: "Ta logaritmen på begge sider: (x − 1) · ln(5) = ln(7). Dermed er x = 1 + ln(7)/ln(5), som også kan skrives 1 + lg(7)/lg(5).",
+          name: "Oppgave 6",
+        },
+        {
+          title: "Oppgave 7",
+          difficulty: "Nivå 7",
+          equation: "3<sup>2x</sup> − 5 · 3<sup>x</sup> − 6 = 0",
+          equationLabel: "3 opphøyd i 2 x minus 5 ganger 3 opphøyd i x minus 6 er lik null",
+          hint: "Sett u = 3ˣ og løs andregradslikningen. Husk at u må være positiv før du finner x.",
+          answer: Math.log(6) / Math.log(3),
+          explanation: "Sett u = 3ˣ. Da blir u² − 5u − 6 = 0, altså (u − 6)(u + 1) = 0. u = −1 er ugyldig fordi 3ˣ er positivt. u = 6 gir 3ˣ = 6, så x = ln(6)/ln(3), som også er lg(6)/lg(3).",
+          name: "Oppgave 7",
+        },
+      ];
+
+      const stageList = document.querySelector("#stage-list");
+      const form = document.querySelector("#answer-form");
+      const answerInput = document.querySelector("#answer");
+      const feedback = document.querySelector("#feedback");
+      const hintButton = document.querySelector("#hint-button");
+      const hintPanel = document.querySelector("#hint-panel");
+      let currentTask = 0;
+      let solved = tasks.map(() => false);
+
+      function parseAnswer(input) {
+        const source = input.trim().replace(/,/g, ".").replace(/^x\s*=\s*/i, "");
+        const tokens = source.match(/(?:\d+(?:\.\d*)?|\.\d+)|[a-z]+|[()+\-*/]/gi) || [];
+        if (!source || tokens.join("") !== source.replace(/\s+/g, "")) {
+          throw new SyntaxError("Ugyldig svarformat.");
+        }
+
+        let position = 0;
+        const peek = () => tokens[position];
+        const take = () => tokens[position++];
+        const parseExpression = () => {
+          let value = parseTerm();
+          while (peek() === "+" || peek() === "-") {
+            const operator = take();
+            const right = parseTerm();
+            value = operator === "+" ? value + right : value - right;
+          }
+          return value;
+        };
+        const parseTerm = () => {
+          let value = parseUnary();
+          while (peek() === "*" || peek() === "/") {
+            const operator = take();
+            const right = parseUnary();
+            value = operator === "*" ? value * right : value / right;
+          }
+          return value;
+        };
+        const parseUnary = () => {
+          if (peek() === "+") {
+            take();
+            return parseUnary();
+          }
+          if (peek() === "-") {
+            take();
+            return -parseUnary();
+          }
+          return parsePrimary();
+        };
+        const parsePrimary = () => {
+          const token = take();
+          if (token === undefined) throw new SyntaxError("Ufullstendig svar.");
+          if (/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(token)) return Number(token);
+          if (token === "(") {
+            const value = parseExpression();
+            if (take() !== ")") throw new SyntaxError("Mangler avsluttende parentes.");
+            return value;
+          }
+          if (/^(ln|lg)$/i.test(token)) {
+            if (take() !== "(") throw new SyntaxError("Logaritmen må ha parenteser.");
+            const argument = parseExpression();
+            if (take() !== ")") throw new SyntaxError("Mangler avsluttende parentes.");
+            if (argument <= 0) throw new SyntaxError("Logaritmen må ha et positivt argument.");
+            return token.toLowerCase() === "ln" ? Math.log(argument) : Math.log10(argument);
+          }
+          throw new SyntaxError("Ugyldig svarformat.");
+        };
+
+        const result = parseExpression();
+        if (position !== tokens.length || !Number.isFinite(result)) {
+          throw new SyntaxError("Ugyldig svarformat.");
+        }
+        return result;
+      }
+
+      function renderStages() {
+        stageList.replaceChildren();
+
+        tasks.forEach((task, index) => {
+          const item = document.createElement("li");
+          const button = document.createElement("button");
+          const isUnlocked = index <= currentTask || solved.slice(0, index).every(Boolean);
+          const isCurrent = index === currentTask;
+          const isSolved = solved[index];
+
+          button.className = `stage-button${isSolved ? " is-solved" : ""}`;
+          button.type = "button";
+          button.disabled = !isUnlocked;
+          button.setAttribute("aria-label", `Etappe ${index + 1}${isSolved ? ", løst" : isUnlocked ? "" : ", låst"}`);
+          if (isCurrent) button.setAttribute("aria-current", "step");
+          button.innerHTML = `
+            <span class="stage-number">${isSolved ? "✓" : index + 1}</span>
+            <span class="stage-copy">
+              <span class="stage-name">${task.name}</span>
+              <span class="stage-detail">${isSolved ? "Fullført" : isUnlocked ? "Klar" : "Låst"}</span>
+            </span>
+            <span class="stage-icon" aria-hidden="true">${isSolved ? "✓" : isUnlocked ? "›" : "⌑"}</span>
+          `;
+          button.addEventListener("click", () => showTask(index));
+          item.append(button);
+          stageList.append(item);
+        });
+
+        const solvedCount = solved.filter(Boolean).length;
+        document.querySelector("#progress-count").textContent = `${solvedCount} av ${tasks.length} løst`;
+        document.querySelector("#progress-fill").style.width = `${(solvedCount / tasks.length) * 100}%`;
+        document.querySelector("#progress-track").setAttribute("aria-valuenow", solvedCount);
+        document.querySelector("#finish-note").textContent =
+          solvedCount === tasks.length
+            ? "Alle etappene er fullført — du har kommet i mål!"
+            : "Klarer du etappen? Da åpner neste seg. Du kan når som helst gå tilbake til etapper du har løst.";
+      }
+
+      function showTask(index) {
+        if (index > currentTask && !solved.slice(0, index).every(Boolean)) return;
+
+        currentTask = index;
+        const task = tasks[index];
+        document.querySelector("#task-label").textContent = `Etappe ${index + 1} av ${tasks.length}`;
+        document.querySelector("#difficulty").textContent = task.difficulty;
+        document.querySelector("#task-title").textContent = task.title;
+        document.querySelector("#equation").innerHTML = task.equation;
+        document.querySelector("#equation").setAttribute("aria-label", task.equationLabel);
+        hintPanel.textContent = task.hint;
+        hintPanel.hidden = true;
+        hintButton.setAttribute("aria-expanded", "false");
+        hintButton.textContent = "Trenger du et hint?";
+        feedback.hidden = true;
+        feedback.className = "feedback";
+        answerInput.value = "";
+        answerInput.disabled = solved[index];
+        form.querySelector('button[type="submit"]').disabled = solved[index];
+
+        if (solved[index]) showSuccess();
+        renderStages();
+        if (!solved[index]) answerInput.focus();
+      }
+
+      function showSuccess() {
+        const task = tasks[currentTask];
+        feedback.className = "feedback success";
+        feedback.innerHTML = `
+          <strong>${currentTask === tasks.length - 1 ? "Du er i mål! 🏁" : "Riktig — etappen er fullført!"}</strong>
+          ${task.explanation}
+          ${currentTask < tasks.length - 1
+            ? '<br /><button class="primary-button" id="next-button" type="button">Neste etappe <span aria-hidden="true">→</span></button>'
+            : '<br /><button class="secondary-button" id="restart-button" type="button">Løp på nytt</button>'}
+        `;
+        feedback.hidden = false;
+        const nextButton = document.querySelector("#next-button");
+        if (nextButton) nextButton.addEventListener("click", () => showTask(currentTask + 1));
+        const restartButton = document.querySelector("#restart-button");
+        if (restartButton) restartButton.addEventListener("click", restart);
+      }
+
+      function restart() {
+        solved = tasks.map(() => false);
+        showTask(0);
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        let answer;
+        try {
+          answer = parseAnswer(answerInput.value);
+        } catch (error) {
+          if (!(error instanceof SyntaxError)) throw error;
+          feedback.className = "feedback error";
+          feedback.textContent = "Skriv inn et gyldig tall, en brøk eller et ln()/lg()-uttrykk.";
+          feedback.hidden = false;
+          answerInput.focus();
+          return;
+        }
+
+        if (Math.abs(answer - tasks[currentTask].answer) < 0.000001) {
+          solved[currentTask] = true;
+          answerInput.disabled = true;
+          form.querySelector('button[type="submit"]').disabled = true;
+          showSuccess();
+          renderStages();
+          return;
+        }
+
+        feedback.className = "feedback error";
+        feedback.innerHTML = "<strong>Ikke helt ennå.</strong>Svaret stemmer ikke. Prøv igjen.";
+        feedback.hidden = false;
+        answerInput.focus();
+        answerInput.select();
+      });
+
+      hintButton.addEventListener("click", () => {
+        const isExpanded = hintButton.getAttribute("aria-expanded") === "true";
+        hintButton.setAttribute("aria-expanded", String(!isExpanded));
+        hintPanel.hidden = isExpanded;
+        hintButton.textContent = isExpanded ? "Trenger du et hint?" : "Skjul hint";
+      });
+
+      renderStages();
+      showTask(0);
+    </script>
+  </body>
+</html>
